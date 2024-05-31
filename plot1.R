@@ -5,7 +5,7 @@ library(mapSpain)
 library(ggplot2)
 library("ggpubr")
 library(data.table)
-source("~/INVASIBILITY_THRESHOLD/code/funcR0.R")
+source("~/RM_mosquito/funcR0.R")
 
 # R_M ---------------------------------------------------------------------
 vec <- seq(5,40,0.001)
