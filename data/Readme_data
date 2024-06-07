@@ -23,3 +23,11 @@ eu_RM_X.csv: csv file with the R_M calculation for Europe for year or period X
   df_dE_aeg: data for Aedes aegypti egg development taken from https://pubmed.ncbi.nlm.nih.gov/19274388/
   
   df_dL_alb.Rds: data for Aedes albocpitus larva development taken from  https://www.scielo.br/j/rsp/a/dvPQ8QMr7Y687hPJxsTxjDg/abstract/?lang=en
+  
+  summon_eu_X.Rds: RM for Aedes albopictus and Aedes aegypti for Europe for the future climate conditions covering the period X.
+  
+  R0_clim_x.Rds: RM for Aedes albopictus and Aedes aegypti for Spain for the year X.
+  
+  clim_X.Rds: RM for Aedes albopictus and Aedes aegypti for Spain for the future climate conditions covering the period X.
+  
+  R0_avg_2003-2020.Rds: RM for Aedes albopictus and Aedes aegypti computed with the monthly average over the period 2003-2020 for the climatic variables and the mean human density for the same period for Spain. 
