@@ -1,5 +1,27 @@
-# How to compute the Mosquito basic reproduction number, $R_M$
-This code computes the Mosquito basic reproduction number, $R_M$, for $Aedes$ $albopictus$ and $Aedes$ $aegypti$ following the methodology in:
+# Present and future suitability of invasive and urban vectors through an environmentally-driven Mosquito Reproduction Number
+
+This directory contains all the code and data in order to reproduce the figures in the main manuscript avaliable in:
+https://www.biorxiv.org/content/10.1101/2024.05.31.596775v1
+
+In the folder code there is one script for each of the figures in the main manuscript. The names of the code files and the figures in the main text are related as follows:
+  . Figure 1: plot1.R
+  . Figure 2 , Figure 4 and Figure 5: panel_camb_clim.R
+  . Figure 3: panel_validation.R
+For the figures in the Supplementary material the respective code is in:
+  . Figure S1: plot1.R
+  . Figure S2: panel_thermal.R
+  . Figure S3: panel_sensitivity.R
+  . Figure S4-7: panel_camb_clim.R
+  . Figure S8-9: panel_validation.R
+
+The two data sources that are not open used for the RM validation are in the data folder (read Readme_data for more details):
+  . BG_count_data_albopictus.csv
+  . PA_Oct_2023_albopictus.csv
+  
+In this data folder there are other datasets, results of processing the enviromental data sets avaliable online, each source explained in the data section of the paper.
+
+--------------------------------------------------------
+Below there is a brief explanation on how to compute Mosquito basic reproduction number, $R_M$, for $Aedes$ $albopictus$ and $Aedes$ $aegypti$ following the methodology in:
 https://www.biorxiv.org/content/10.1101/2024.05.31.596775v1
 
 The Mosquito basic reproduction number is given by:
@@ -21,4 +43,3 @@ R0_func_aeg(Te,rain,hum) # R_M for Aedes aegypti
 This number could be compute it at different scale but always taken the average rainfall. The units must be daily rainfall.
 So if we do it for a month there should be the average monthly rainfall NOT the accumulated rainfall.
 
-In the folder code there is one script for each of the figures in the main manuscript. Also, for the sensitivity analysis performed, avaliable in the supplementary material. 
