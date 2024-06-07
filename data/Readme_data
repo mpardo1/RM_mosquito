@@ -1,0 +1,19 @@
+This directory contains the following datasets:
+
+BG_count_data_albopictus.csv: CSV with number of females mosquitoes of Aedes albopictus find in a BG trap
+which was located on a especific city for a particular period of time. Columns:
+  . trap_name: name of the trap
+  . province: NUT3 level Spain
+  . city: city name where the trap was located
+  . start_date: date when the trap was located
+  . end_date: data when the trap was collected
+  . trapping_efort:  end_date-star_date
+  . latitude: latitude where the trap was located
+  . longitude: longitude where the trap was located
+  . trap_type: type of trap
+  . females: number of females mosquitoes of Aedes albopictus found in this trap for the period from start_date to end_date.
+
+eu_RM_X.csv: csv file with the R_M calculation for Europe for year or period X
+  . id: id of the cell
+  . sum_alb: number of suitable months, R_M>1, for Aedes albopictus in this particular cell for year or period X
+  . sum_aeg:  number of suitable months, R_M>1, for Aedes aegypti in this particular cell for year or period X
