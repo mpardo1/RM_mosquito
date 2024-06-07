@@ -4,23 +4,25 @@ This directory contains all the code and data in order to reproduce the figures 
 https://www.biorxiv.org/content/10.1101/2024.05.31.596775v1
 
 In the folder code there is one script for each of the figures in the main manuscript. The names of the code files and the figures in the main text are related as follows:
-  . Figure 1: plot1.R
-  . Figure 2 , Figure 4 and Figure 5: panel_camb_clim.R
-  . Figure 3: panel_validation.R
-For the figures in the Supplementary material the respective code is in:
-  . Figure S1: plot1.R
-  . Figure S2: panel_thermal.R
-  . Figure S3: panel_sensitivity.R
-  . Figure S4-7: panel_camb_clim.R
-  . Figure S8-9: panel_validation.R
+  - Figure 1: plot1.R
+  - Figure 2 , Figure 4 and Figure 5: panel_camb_clim.R
+  - Figure 3: panel_validation.R
 
-The two data sources that are not open used for the RM validation are in the data folder (read Readme_data for more details):
-  . BG_count_data_albopictus.csv
-  . PA_Oct_2023_albopictus.csv
+For the figures in the Supplementary material the respective code is in:
+  - Figure S1: plot1.R
+  - Figure S2: panel_thermal.R
+  - Figure S3: panel_sensitivity.R
+  - Figure S4-7: panel_camb_clim.R
+  - Figure S8-9: panel_validation.R
+
+The two data sources that are produced by the authors, used for the RM validation, are in the data folder (read Readme_data for more details):
+  - BG_count_data_albopictus.csv
+  - PA_Oct_2023_albopictus.csv
   
-In this data folder there are other datasets, results of processing the enviromental data sets avaliable online, each source explained in the data section of the paper.
+In this data folder there are other datasets, results of processing the enviromental data sets avaliable online, each data source is explained in the data section of the paper.
 
 --------------------------------------------------------
+# Computing $R_M$ at different scales
 Below there is a brief explanation on how to compute Mosquito basic reproduction number, $R_M$, for $Aedes$ $albopictus$ and $Aedes$ $aegypti$ following the methodology in:
 https://www.biorxiv.org/content/10.1101/2024.05.31.596775v1
 
