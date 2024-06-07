@@ -7,19 +7,23 @@ library(tidyverse)
 library(data.table)
 library(sf)
 library(ggpubr)
-source("~/RM_mosquito/funcR0.R")
+source("~/RM_mosquito/code/funcR0.R")
 
-# Load data frames
+# Load df with RM for 2041-2060 and 2061-2080
 time = "2041-2060"
-clim_df_41 <- readRDS(paste0("~/RM_mosquito/data/summon_eu_",time,".Rds"))
+clim_df_41 <- readRDS(paste0("~/INVASIBILITY_THRESHOLD/output/summon_eu_",time,".Rds"))
 colnames(clim_df_41) <- c("id","sum_alb_fut41","sum_aeg_fut41","sum_jap_fut41","lon","lat")
 time = "2061-2080"
-clim_df <- readRDS(paste0("~/RM_mosquito/data/summon_eu_",time,".Rds"))
+clim_df <- readRDS(paste0("~/INVASIBILITY_THRESHOLD/output/summon_eu_",time,".Rds"))
 colnames(clim_df) <- c("id","sum_alb_fut","sum_aeg_fut","sum_jap_fut","lon","lat")
-clim_pop <- readRDS(paste0("~/RM_mosquito/data/eu_R0_fitfuture_clim_",2020,".Rds"))
+
+# Load df with RM for 2020
+clim_pop <- readRDS(paste0("~/INVASIBILITY_THRESHOLD/data/ERA5/Europe/eu_R0_fitfuture_clim_",2020,".Rds"))
 colnames(clim_pop) <- c("id","sum_alb_pres","sum_aeg_pres","sum_jap_pres","lon","lat")
 
+
 # Plot 2020 aeg and alb
+# ggplot albopictus
 library(RColorBrewer)
 name_pal = "RdYlBu"
 display.brewer.pal(11, name_pal)
@@ -27,9 +31,9 @@ pal <- rev(brewer.pal(11, name_pal))
 pal[11]
 pal[12] = "#74011C"
 pal[13] = "#4B0011"
-alb <- ggplot(clim_pop,
+aeg_pres <- ggplot(clim_pop,
               aes(x = lon, y = lat,
-                  fill = as.factor(sum_alb_pres))) +
+                  fill = as.factor(sum_aeg_pres))) +
   geom_raster() +
   scale_fill_manual(values = pal,
                     name = "Nº suitable \n months",
@@ -48,9 +52,31 @@ alb <- ggplot(clim_pop,
         axis.ticks.length = unit(0, "null"),
         axis.ticks.margin = unit(0, "null"))
 
+alb_pres <- ggplot(clim_pop,
+                   aes(x = lon, y = lat,
+                       fill = as.factor(sum_alb_pres))) +
+  geom_raster() +
+  scale_fill_manual(values = pal,
+                    name = "Nº suitable \n months",
+                    limits = factor(seq(0,12,1)),
+                    na.value = "white") +
+  theme(legend.position = "none",
+        panel.background = element_rect(fill = "transparent", colour = NA),
+        plot.background = element_rect(fill = "transparent", colour = NA),
+        panel.grid = element_blank(),
+        plot.margin = unit(c(0, 0, 0, 0), "null"),
+        panel.margin = unit(c(0, 0, 0, 0), "null"),
+        axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.line = element_blank(),
+        axis.ticks.length = unit(0, "null"),
+        axis.ticks.margin = unit(0, "null"))
+
+
 leg_sum <- get_legend(ggplot(clim_pop,
                              aes(x = lon, y = lat,
-                                 fill = as.factor(sum_aeg_pres))) +
+                                 fill = as.factor(sum_alb_pres))) +
                         geom_raster() +
                         scale_fill_manual(values = pal,
                                           name = "Nº suitable \n months",
@@ -61,8 +87,9 @@ leg_sum <- get_legend(ggplot(clim_pop,
                           title.position = "left",  # Position title at the top
                           label.position = "bottom"  # Position labels at the bottom
                         )))
-gg1 <- ggarrange(alb + ggtitle(expression(paste("a) ",italic("Ae. albopictus")))),
-          aeg + ggtitle(expression(paste("b) ",italic("Ae. aegypti")))),
+
+gg1 <- ggarrange(alb_pres + ggtitle(expression(paste("a) ",italic("Ae. albopictus")))),
+          aeg_pres + ggtitle(expression(paste("b) ",italic("Ae. aegypti")))),
           nrow = 1)
 
 ggarrange(gg1,leg_sum, ncol = 1, heights = c(1,0.2))
@@ -84,13 +111,28 @@ clim_df$diff_aeg6141 <- clim_df$sum_aeg_fut - clim_df$sum_aeg_fut41
 name_pal = "RdYlBu"
 display.brewer.pal(11, name_pal)
 pal <- rev(brewer.pal(11, name_pal))
-pal1 <- rep("0",length(pal) +1 )
+pal1 <- pal
 pal1[3:6] <- pal[1:4]
 pal1[1] <- "#000455"
 pal1[2] <- "#0C1290"
 pal1[7] <- "#FFFFFF"
 pal1[8:13] <- pal[6:11]
 pal1[14] = "#74011C"
+# pal[13] = "#4B0011"
+pal2 <- pal1
+pal2[15] = "black"
+pal2[16] = "black"
+pal2[17] = "black"
+# Check raster points with negative numbers
+clim_df$diff_alb_mod <- clim_df$diff_aeg
+clim_df$diff_alb_mod <- ifelse(clim_df$diff_alb_mod>=3,10,clim_df$diff_alb_mod)
+ggplot(clim_df,
+       aes(x = lon, y = lat,
+           fill = as.factor(diff_alb_mod))) +
+  geom_raster() +
+  scale_fill_manual(values = pal2,
+                    name = "Difference in\n suitable months",
+                    limits = factor(seq(-6,10,1)))
 
 # ggplot albopictus
 diff_aeg <- ggplot(clim_df,
@@ -116,7 +158,7 @@ diff_aeg <- ggplot(clim_df,
 
 leg <- (get_legend(ggplot(clim_df,
                             aes(x = lon, y = lat,
-                                fill = as.factor(diff_aeg))) +
+                                fill = as.factor(sum_alb_fut))) +
                        geom_raster() +
                        scale_fill_manual(values = pal1,
                                          name = "Difference in\n months",
@@ -130,10 +172,10 @@ diff_alb <- ggplot(clim_df,
                    aes(x = lon, y = lat,
                        fill = as.factor(diff_alb))) +
   geom_raster() +
-  scale_fill_manual(values = pal1[c(3:4,7,10:13)],
+  scale_fill_manual(values = pal1,
                     name = "Difference in\n suitable months",
                     na.value = "white",
-                    limits = factor(seq(-2,4,1))) +
+                    limits = factor(seq(-6,7,1))) +
   theme(legend.position = "none",
         panel.background = element_rect(fill = "transparent", colour = NA),
         plot.background = element_rect(fill = "transparent", colour = NA),
@@ -147,20 +189,14 @@ diff_alb <- ggplot(clim_df,
         axis.ticks.length = unit(0, "null"),
         axis.ticks.margin = unit(0, "null"))  
 
-leg <- (get_legend(ggplot(clim_df,
+leg <- get_legend(ggplot(clim_df,
                           aes(x = lon, y = lat,
-                              fill = as.factor(diff_aeg6141))) +
+                              fill = as.factor(diff_alb))) +
                      geom_raster() +
-                     scale_fill_manual(values = pal1[c(3:4,7,10:13)],
-                                       name = "Difference in\n months",
-                                       na.value = "#FAFAFA",
-                                       limits = factor(seq(-2,4,1))) )+
-          guides(fill = guide_legend(
-            ncol = 14,  # Set the number of columns
-            title.position = "left",  # Position title at the top
-            label.position = "bottom"  # Position labels at the bottom
-          )) 
-)
+                     scale_fill_manual(name = "Difference in\n suitable months",
+                                       values = pal1,
+                                       limits = factor(seq(-6,7,1))))
+
 
 # ggplot albopictus
 name_pal = "RdYlBu"
@@ -169,12 +205,13 @@ pal <- rev(brewer.pal(11, name_pal))
 pal[11]
 pal[12] = "#74011C"
 pal[13] = "#4B0011"
-aeg <- ggplot(clim_df,
-                   aes(x = lon, y = lat,
-                       fill = as.factor(sum_aeg_fut))) +
+alb <- ggplot(clim_df,
+              aes(x = lon, y = lat,
+                  fill = as.factor(sum_alb_fut))) +
   geom_raster() +
   scale_fill_manual(values = pal,
-                    name = "Nº suitable \n months",
+                    name = "",
+                    # name = "Nº suitable \n months",
                     limits = factor(seq(0,12,1)),
                     na.value = "white") +
   theme(legend.position = "none",
@@ -190,23 +227,52 @@ aeg <- ggplot(clim_df,
         axis.ticks.length = unit(0, "null"),
         axis.ticks.margin = unit(0, "null"))
 
+aeg <- ggplot(clim_df,
+                   aes(x = lon, y = lat,
+                       fill = as.factor(sum_aeg_fut))) +
+  geom_raster() +
+  scale_fill_manual(values = pal,
+                    name = "",
+                    # name = "Nº suitable \n months",
+                    limits = factor(seq(0,12,1)),
+                    na.value = "white") +
+  theme(legend.position = "none",
+        panel.background = element_rect(fill = "transparent", colour = NA),
+        plot.background = element_rect(fill = "transparent", colour = NA),
+        panel.grid = element_blank(),
+        plot.margin = unit(c(0, 0, 0, 0), "null"),
+        panel.margin = unit(c(0, 0, 0, 0), "null"),
+        axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.line = element_blank(),
+        axis.ticks.length = unit(0, "null"),
+        axis.ticks.margin = unit(0, "null"))
+
+
+library("latex2exp")
 leg1 <- get_legend( ggplot(clim_df,
                             aes(x = lon, y = lat,
                                 fill = as.factor(sum_alb_fut))) +
                        geom_raster() +
                        scale_fill_manual(values = pal,
-                                         name = "Nº suitable \n months",
+                                         # name = TeX("Nº suitable \n months ($R_M>1$)"),
+                                         name = TeX(""),
                                          limits = factor(seq(0,12,1)),
                                          na.value = "white"))
-
-
-gg1 <- ggarrange(alb + ggtitle(expression(paste("a) ",italic("Ae. albopictus")))),
-                 aeg + ggtitle(expression(paste("b) ",italic("Ae. aegypti")))),
+# Create panel for main
+gg <- ggarrange(alb,
+          aeg ,
+          leg1,
+          nrow = 1,
+          widths = c(1,1,0.3))
+gg1 <- ggarrange(alb + ggtitle(expression(paste("a) ",italic("Aedes albopictus")))),
+                 aeg + ggtitle(expression(paste("b) ",italic("Aedes aegypti")))),
                  leg1,
                  nrow = 1,
                  widths = c(1,1,0.3))
-gg2 <- ggarrange(diff_alb + ggtitle(expression(paste("c) ",italic("Ae. albopictus")))),
-                 diff_aeg + ggtitle(expression(paste("d) ",italic("Ae. aegypti")))),
+gg2 <- ggarrange(diff_alb + ggtitle(expression(paste("c) ",italic("Aedes albopictus")))),
+                 diff_aeg + ggtitle(expression(paste("d) ",italic("Aedes aegypti")))),
                  leg,
                  nrow = 1,
                  widths = c(1,1,0.3))
@@ -282,11 +348,9 @@ pal1[8:13] <- pal[6:11]
 pal1[14] = "#74011C"
 
 # Diff maps
-diff_1 <- ggplot(df_join) +
-  geom_sf(aes(fill = as.factor(diff_0420)), colour = NA) +
-  # geom_sf(aes(fill = as.factor(diff_2040)), colour = NA) +
-  # geom_sf(aes(fill = as.factor(diff_4060)), colour = NA) +
-  # geom_sf(aes(fill = as.factor(diff_2080)), colour = NA) +
+
+ diff_1 <- ggplot(df_join) +
+   geom_sf(aes(fill = as.factor(diff_0420)), colour = NA) +
   geom_sf(data = perim_esp, fill = NA, alpha = 0.5, color = "grey") +
   geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
   scale_fill_manual(na.value = "#F6F6F6",values = pal1,
@@ -302,7 +366,82 @@ diff_1 <- ggplot(df_join) +
     label.position = "bottom"  # Position labels at the bottom
   ))
 
+
+  diff_2 <- ggplot(df_join) +
+    geom_sf(aes(fill = as.factor(diff_2040)), colour = NA) +
+   geom_sf(data = perim_esp, fill = NA, alpha = 0.5, color = "grey") +
+   geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
+   scale_fill_manual(na.value = "#F6F6F6",values = pal1,
+                     name = "Difference \n in months",
+                     limits = c(min(df_join$diff_0420,
+                                    df_join$diff_2040):max(df_join$diff_0420,
+                                                           df_join$diff_2040))) +
+   theme_minimal() +
+   theme(legend.position = "none") +
+   guides(fill = guide_legend(
+     ncol = 13,  # Set the number of columns
+     title.position = "left",  # Position title at the top
+     label.position = "bottom"  # Position labels at the bottom
+   ))
+ 
+    
+    diff_3 <- ggplot(df_join) +
+      geom_sf(aes(fill = as.factor(diff_4060)), colour = NA) +
+      geom_sf(data = perim_esp, fill = NA, alpha = 0.5, color = "grey") +
+      geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
+      scale_fill_manual(na.value = "#F6F6F6",values = pal1,
+                        name = "Difference \n in months",
+                        limits = c(min(df_join$diff_0420,
+                                       df_join$diff_2040):max(df_join$diff_0420,
+                                                              df_join$diff_2040))) +
+      theme_minimal() +
+      theme(legend.position = "none") +
+      guides(fill = guide_legend(
+        ncol = 13,  # Set the number of columns
+        title.position = "left",  # Position title at the top
+        label.position = "bottom"  # Position labels at the bottom
+      ))
+    
+    diff_4 <- ggplot(df_join) +
+      geom_sf(aes(fill = as.factor(diff_2080)), colour = NA) +
+      geom_sf(data = perim_esp, fill = NA, alpha = 0.5, color = "grey") +
+      geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
+      scale_fill_manual(na.value = "#F6F6F6",values = pal1,
+                        name = "Difference \n in months",
+                        limits = c(min(df_join$diff_0420,
+                                       df_join$diff_2040):max(df_join$diff_0420,
+                                                              df_join$diff_2040))) +
+      theme_minimal() +
+      theme(legend.position = "none") +
+      guides(fill = guide_legend(
+        ncol = 13,  # Set the number of columns
+        title.position = "left",  # Position title at the top
+        label.position = "bottom"  # Position labels at the bottom
+      ))
+    
+ 
 library(ggpubr)
+leg1 <- get_legend(ggplot(df_join) +
+             geom_sf(aes(fill = as.factor(diff_0420)), colour = NA) +
+             # geom_sf(aes(fill = as.factor(diff_2040)), colour = NA) +
+             # geom_sf(aes(fill = as.factor(diff_4060)), colour = NA) +
+             # geom_sf(aes(fill = as.factor(diff_2080)), colour = NA) +
+             geom_sf(data = perim_esp, fill = NA, alpha = 0.5,
+                     color = "grey") +
+             geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
+             scale_fill_manual(na.value = "#F6F6F6",values = pal1,
+                               name = "Difference \n in months",
+                               limits = c(min(df_join$diff_0420,
+                                              df_join$diff_2040):max(df_join$diff_0420,
+                                                                     df_join$diff_2040))) +
+             theme_minimal() +
+               theme(legend.position = "bottom") +
+               guides(fill = guide_legend(
+                 ncol = 13,  # Set the number of columns
+                 title.position = "left",  # Position title at the top
+                 label.position = "bottom"  # Position labels at the bottom
+               )))
+
 leg1 <- get_legend(ggplot(df_join) +
              geom_sf(aes(fill = as.factor(diff_0420)), colour = NA) +
              # geom_sf(aes(fill = as.factor(diff_2040)), colour = NA) +
@@ -333,12 +472,49 @@ pal <- rev(brewer.pal(11, name_pal))
 pal[11]
 pal[12] = "#74011C"
 pal[13] = "#4B0011"
-
 alb_04 <- ggplot(df_join) +
-   geom_sf(aes(fill = as.factor(Alb_2004)), colour = NA) +
-  # geom_sf(aes(fill = as.factor(Alb_2020)), colour = NA) +
-  # geom_sf(aes(fill = as.factor(Alb_2040)), colour = NA) +
-  # geom_sf(aes(fill = as.factor(Alb_2060)), colour = NA) +
+  geom_sf(aes(fill = as.factor(Alb_2004)), colour = NA) +
+  geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
+  scale_fill_manual(na.value = "#F6F6F6",values = pal,
+                    name = "Nº suitable \n months",
+                    limits = as.factor(seq(0,12,1))) +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  guides(fill = guide_legend(
+    ncol = 13,  # Set the number of columns
+    title.position = "left",  # Position title at the top
+    label.position = "bottom"  # Position labels at the bottom
+  ))
+
+alb_20 <- ggplot(df_join) +  geom_sf(aes(fill = as.factor(Alb_2020)), colour = NA) +
+  geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
+  scale_fill_manual(na.value = "#F6F6F6",values = pal,
+                    name = "Nº suitable \n months",
+                    limits = as.factor(seq(0,12,1))) +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  guides(fill = guide_legend(
+    ncol = 13,  # Set the number of columns
+    title.position = "left",  # Position title at the top
+    label.position = "bottom"  # Position labels at the bottom
+  ))
+
+alb_60 <- ggplot(df_join) +
+ geom_sf(aes(fill = as.factor(Alb_2040)), colour = NA) +
+  geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
+  scale_fill_manual(na.value = "#F6F6F6",values = pal,
+                    name = "Nº suitable \n months",
+                    limits = as.factor(seq(0,12,1))) +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  guides(fill = guide_legend(
+    ncol = 13,  # Set the number of columns
+    title.position = "left",  # Position title at the top
+    label.position = "bottom"  # Position labels at the bottom
+  ))
+
+alb_80 <- ggplot(df_join) +
+  geom_sf(aes(fill = as.factor(Alb_2060)), colour = NA) +
   geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
   scale_fill_manual(na.value = "#F6F6F6",values = pal,
                     name = "Nº suitable \n months",
@@ -353,9 +529,6 @@ alb_04 <- ggplot(df_join) +
 
 leg <- get_legend(ggplot(df_join) +
   geom_sf(aes(fill = as.factor(Alb_2004)), colour = NA) +
-  # geom_sf(aes(fill = as.factor(Alb_2020)), colour = NA) +
-  # geom_sf(aes(fill = as.factor(Alb_2040)), colour = NA) +
-  # geom_sf(aes(fill = as.factor(Alb_2060)), colour = NA) +
   geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
   scale_fill_manual(na.value = "#F6F6F6",values = pal,
                     name = "Nº suitable \n months",
@@ -372,3 +545,5 @@ gg2 <- ggarrange(diff_1 + ggtitle("e)"),
                  diff_3 + ggtitle("g)"),
                  nrow = 1, widths = c(1,1,1))
 ggarrange(gg1,gg2, leg1,nrow = 3, heights = c(0.9,1,0.3))
+
+

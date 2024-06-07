@@ -17,3 +17,9 @@ eu_RM_X.csv: csv file with the R_M calculation for Europe for year or period X
   . id: id of the cell
   . sum_alb: number of suitable months, R_M>1, for Aedes albopictus in this particular cell for year or period X
   . sum_aeg:  number of suitable months, R_M>1, for Aedes aegypti in this particular cell for year or period X
+  
+ df_dE: data for Aedes albocpitus egg development taken from  https://www.scielo.br/j/rsp/a/dvPQ8QMr7Y687hPJxsTxjDg/abstract/?lang=en
+ 
+  df_dE_aeg: data for Aedes aegypti egg development taken from https://pubmed.ncbi.nlm.nih.gov/19274388/
+  
+  df_dL_alb.Rds: data for Aedes albocpitus larva development taken from  https://www.scielo.br/j/rsp/a/dvPQ8QMr7Y687hPJxsTxjDg/abstract/?lang=en
