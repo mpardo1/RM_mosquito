@@ -1,39 +1,10 @@
-## Code that Compare the PA data for albopictus in comparison with
-# the number o months in which R0>1 and the avg R0
+## Code to produce Figure 1 
 rm(list=ls())
 library(mapSpain)
 library(ggplot2)
 library("ggpubr")
 library(data.table)
 source("~/RM_mosquito/code/funcR0.R")
-
-# Test Egg mortality
-vec <- seq(5,40,0.001)
-deltaE_aeg <- sapply(vec,deltaE_f_aeg)
-deltaE_alb <- sapply(vec,deltaE_f_alb)
-
-df_deltaE <- data.frame(vec,deltaE_aeg,deltaE_alb)
-ggplot(df_deltaE) + geom_line(aes(vec,deltaE_aeg)) + geom_line(aes(vec,deltaE_alb))
-
-# Test Fecundity albopictus and aegypti
-fa <- function(x){
-  TFD_f_alb(x)*a_f_alb(x)
-}
-vec <- seq(5,40,0.001)
-fa_aeg <- sapply(vec,EFD_f_aeg)
-fa_alb <- sapply(vec,fa)
-
-df_fa <- data.frame(vec,fa_aeg,fa_alb)
-df_fa <- reshape2::melt(df_fa, id.vars = c("vec"))
-ggplot(df_fa) +
-  geom_line(aes(vec,value,color=variable), size = 1) +
-  scale_color_viridis_d(name = "", option = "D",
-                        labels= c(TeX("\\textit{Ae. aegypti } EFD"),
-                                  TeX("\\textit{Ae. albopictus } fa"))) +
-  xlab("Temperature") +
-  theme_bw() + theme(legend.position = c(0.2,0.8),
-                     text = element_text(size = 14),
-                     legend.text.align = 0)
 
 # R_M ---------------------------------------------------------------------
 vec <- seq(5,40,0.001)
@@ -80,7 +51,7 @@ plot_temp
 
 # rm as a function of rainfall ------------------------------------------
 vec <- seq(0,16,0.001)
-temp_opt <- 17.5
+temp_opt <- 15
 aegypti <- sapply(vec,R0_func_aeg, hum = 0, Te = temp_opt)
 albopictus <- sapply(vec,R0_func_alb, hum = 0, Te = temp_opt)
 df_rain <- data.frame(vec, albopictus, aegypti)
@@ -121,12 +92,6 @@ plot_hum
 ggarrange(plot_temp + ggtitle("a)"),
           plot_rain + rremove("ylab")+ ggtitle("b)"),
           plot_hum + rremove("ylab")+ ggtitle("c)"),
-          ncol = 3,
-          widths = c(1,0.7,0.7))
-
-ggarrange(plot_temp,
-          plot_rain + rremove("ylab"),
-          plot_hum + rremove("ylab"),
           ncol = 3,
           widths = c(1,0.7,0.7))
 

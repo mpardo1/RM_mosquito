@@ -7,18 +7,18 @@ library(tidyverse)
 library(data.table)
 library(sf)
 library(ggpubr)
-source("~/RM_mosquito/code/funcR0.R")
+source("code/funcR0.R")
 
 # Load df with RM for 2041-2060 and 2061-2080
 time = "2041-2060"
-clim_df_41 <- readRDS(paste0("~/INVASIBILITY_THRESHOLD/output/summon_eu_",time,".Rds"))
+clim_df_41 <- readRDS(paste0("data/summon_eu_",time,".Rds"))
 colnames(clim_df_41) <- c("id","sum_alb_fut41","sum_aeg_fut41","sum_jap_fut41","lon","lat")
 time = "2061-2080"
-clim_df <- readRDS(paste0("~/INVASIBILITY_THRESHOLD/output/summon_eu_",time,".Rds"))
+clim_df <- readRDS(paste0("data/summon_eu_",time,".Rds"))
 colnames(clim_df) <- c("id","sum_alb_fut","sum_aeg_fut","sum_jap_fut","lon","lat")
 
 # Load df with RM for 2020
-clim_pop <- readRDS(paste0("~/INVASIBILITY_THRESHOLD/data/ERA5/Europe/eu_R0_fitfuture_clim_",2020,".Rds"))
+clim_pop <- readRDS(paste0("data/eu_R0_fitfuture_clim_",2020,".Rds"))
 colnames(clim_pop) <- c("id","sum_alb_pres","sum_aeg_pres","sum_jap_pres","lon","lat")
 
 
@@ -94,7 +94,7 @@ gg1 <- ggarrange(alb_pres + ggtitle(expression(paste("a) ",italic("Ae. albopictu
 
 ggarrange(gg1,leg_sum, ncol = 1, heights = c(1,0.2))
 
-# Climat change panels ----------------------------------------------
+# Climate change panels ----------------------------------------------
 # Join two data frames
 clim_df <- clim_df %>% left_join(clim_pop, by = join_by(lon,lat))
 clim_df <- clim_df %>% left_join(clim_df_41, by = join_by(lon,lat))
@@ -124,15 +124,15 @@ pal2[15] = "black"
 pal2[16] = "black"
 pal2[17] = "black"
 # Check raster points with negative numbers
-clim_df$diff_alb_mod <- clim_df$diff_aeg
-clim_df$diff_alb_mod <- ifelse(clim_df$diff_alb_mod>=3,10,clim_df$diff_alb_mod)
-ggplot(clim_df,
-       aes(x = lon, y = lat,
-           fill = as.factor(diff_alb_mod))) +
-  geom_raster() +
-  scale_fill_manual(values = pal2,
-                    name = "Difference in\n suitable months",
-                    limits = factor(seq(-6,10,1)))
+# clim_df$diff_alb_mod <- clim_df$diff_aeg
+# clim_df$diff_alb_mod <- ifelse(clim_df$diff_alb_mod>=3,10,clim_df$diff_alb_mod)
+# ggplot(clim_df,
+#        aes(x = lon, y = lat,
+#            fill = as.factor(diff_alb_mod))) +
+#   geom_raster() +
+#   scale_fill_manual(values = pal2,
+#                     name = "Difference in\n suitable months",
+#                     limits = factor(seq(-6,10,1)))
 
 # ggplot albopictus
 diff_aeg <- ggplot(clim_df,
@@ -166,8 +166,7 @@ leg <- (get_legend(ggplot(clim_df,
                                          limits = factor(seq(-6,7,1))))) 
         
 
-# Plots para el sup
-# ggplot albopictus
+# Plots para el sup  ----------------------------------------
 diff_alb <- ggplot(clim_df,
                    aes(x = lon, y = lat,
                        fill = as.factor(diff_alb))) +
@@ -348,16 +347,13 @@ pal1[8:13] <- pal[6:11]
 pal1[14] = "#74011C"
 
 # Diff maps
-
- diff_1 <- ggplot(df_join) +
-   geom_sf(aes(fill = as.factor(diff_0420)), colour = NA) +
+diff_1 <- ggplot(df_join) +
+  geom_sf(aes(fill = as.factor(diff_0420)), colour = NA) +
   geom_sf(data = perim_esp, fill = NA, alpha = 0.5, color = "grey") +
   geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
   scale_fill_manual(na.value = "#F6F6F6",values = pal1,
                     name = "Difference \n in months",
-                    limits = c(min(df_join$diff_0420,
-                                   df_join$diff_2040):max(df_join$diff_0420,
-                                                          df_join$diff_2040))) +
+                    limits = c(-6:5)) +
   theme_minimal() +
   theme(legend.position = "none") +
   guides(fill = guide_legend(
@@ -367,101 +363,76 @@ pal1[14] = "#74011C"
   ))
 
 
-  diff_2 <- ggplot(df_join) +
-    geom_sf(aes(fill = as.factor(diff_2040)), colour = NA) +
-   geom_sf(data = perim_esp, fill = NA, alpha = 0.5, color = "grey") +
-   geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
-   scale_fill_manual(na.value = "#F6F6F6",values = pal1,
-                     name = "Difference \n in months",
-                     limits = c(min(df_join$diff_0420,
-                                    df_join$diff_2040):max(df_join$diff_0420,
-                                                           df_join$diff_2040))) +
-   theme_minimal() +
-   theme(legend.position = "none") +
-   guides(fill = guide_legend(
-     ncol = 13,  # Set the number of columns
-     title.position = "left",  # Position title at the top
-     label.position = "bottom"  # Position labels at the bottom
-   ))
- 
-    
-    diff_3 <- ggplot(df_join) +
-      geom_sf(aes(fill = as.factor(diff_4060)), colour = NA) +
-      geom_sf(data = perim_esp, fill = NA, alpha = 0.5, color = "grey") +
-      geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
-      scale_fill_manual(na.value = "#F6F6F6",values = pal1,
-                        name = "Difference \n in months",
-                        limits = c(min(df_join$diff_0420,
-                                       df_join$diff_2040):max(df_join$diff_0420,
-                                                              df_join$diff_2040))) +
-      theme_minimal() +
-      theme(legend.position = "none") +
-      guides(fill = guide_legend(
-        ncol = 13,  # Set the number of columns
-        title.position = "left",  # Position title at the top
-        label.position = "bottom"  # Position labels at the bottom
-      ))
-    
-    diff_4 <- ggplot(df_join) +
-      geom_sf(aes(fill = as.factor(diff_2080)), colour = NA) +
-      geom_sf(data = perim_esp, fill = NA, alpha = 0.5, color = "grey") +
-      geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
-      scale_fill_manual(na.value = "#F6F6F6",values = pal1,
-                        name = "Difference \n in months",
-                        limits = c(min(df_join$diff_0420,
-                                       df_join$diff_2040):max(df_join$diff_0420,
-                                                              df_join$diff_2040))) +
-      theme_minimal() +
-      theme(legend.position = "none") +
-      guides(fill = guide_legend(
-        ncol = 13,  # Set the number of columns
-        title.position = "left",  # Position title at the top
-        label.position = "bottom"  # Position labels at the bottom
-      ))
-    
- 
-library(ggpubr)
-leg1 <- get_legend(ggplot(df_join) +
-             geom_sf(aes(fill = as.factor(diff_0420)), colour = NA) +
-             # geom_sf(aes(fill = as.factor(diff_2040)), colour = NA) +
-             # geom_sf(aes(fill = as.factor(diff_4060)), colour = NA) +
-             # geom_sf(aes(fill = as.factor(diff_2080)), colour = NA) +
-             geom_sf(data = perim_esp, fill = NA, alpha = 0.5,
-                     color = "grey") +
-             geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
-             scale_fill_manual(na.value = "#F6F6F6",values = pal1,
-                               name = "Difference \n in months",
-                               limits = c(min(df_join$diff_0420,
-                                              df_join$diff_2040):max(df_join$diff_0420,
-                                                                     df_join$diff_2040))) +
-             theme_minimal() +
-               theme(legend.position = "bottom") +
-               guides(fill = guide_legend(
-                 ncol = 13,  # Set the number of columns
-                 title.position = "left",  # Position title at the top
-                 label.position = "bottom"  # Position labels at the bottom
-               )))
+diff_2 <- ggplot(df_join) +
+  geom_sf(aes(fill = as.factor(diff_2060)), colour = NA) +
+  geom_sf(data = perim_esp, fill = NA, alpha = 0.5, color = "grey") +
+  geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
+  scale_fill_manual(na.value = "#F6F6F6",values = pal1,
+                    name = "Difference \n in months",
+                    limits = c(-6:5)) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  guides(fill = guide_legend(
+    ncol = 13,  # Set the number of columns
+    title.position = "left",  # Position title at the top
+    label.position = "bottom"  # Position labels at the bottom
+  ))
 
+
+diff_3 <- ggplot(df_join) +
+  geom_sf(aes(fill = as.factor(diff_6080)), colour = NA) +
+  geom_sf(data = perim_esp, fill = NA, alpha = 0.5, color = "grey") +
+  geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
+  scale_fill_manual(na.value = "#F6F6F6",values = pal1,
+                    name = "Difference \n in months",
+                    limits = c(-6:5)) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  guides(fill = guide_legend(
+    ncol = 13,  # Set the number of columns
+    title.position = "left",  # Position title at the top
+    label.position = "bottom"  # Position labels at the bottom
+  ))
+
+
+diff_4 <- ggplot(df_join) +
+  geom_sf(aes(fill = as.factor(diff_2080)), colour = NA) +
+  geom_sf(data = perim_esp, fill = NA, alpha = 0.5, color = "grey") +
+  geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
+  scale_fill_manual(na.value = "#F6F6F6",
+                    values = pal1,
+                    name = "Difference \n in months",
+                    limits = c(-6:5)) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  guides(fill = guide_legend(
+    ncol = 13,  # Set the number of columns
+    title.position = "left",  # Position title at the top
+    label.position = "bottom"  # Position labels at the bottom
+  ))
+
+library(ggpubr)
+df_join[1,"diff_2080"] <- 5
+df_join[2,"diff_2080"] <- -5
+df_join[3,"diff_2080"] <- -4
+df_join <- drop_na(df_join)
 leg1 <- get_legend(ggplot(df_join) +
-             geom_sf(aes(fill = as.factor(diff_0420)), colour = NA) +
-             # geom_sf(aes(fill = as.factor(diff_2040)), colour = NA) +
-             # geom_sf(aes(fill = as.factor(diff_4060)), colour = NA) +
-             # geom_sf(aes(fill = as.factor(diff_2080)), colour = NA) +
-             geom_sf(data = perim_esp, fill = NA, alpha = 0.5,
-                     color = "grey") +
-             geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
-             scale_fill_manual(na.value = "#F6F6F6",values = pal1,
-                               name = "Difference \n in months",
-                               limits = c(min(df_join$diff_0420,
-                                              df_join$diff_2040):max(df_join$diff_0420,
-                                                                     df_join$diff_2040))) +
-             theme_minimal() +
-               theme(legend.position = "bottom") +
-               guides(fill = guide_legend(
-                 ncol = 13,  # Set the number of columns
-                 title.position = "left",  # Position title at the top
-                 label.position = "bottom"  # Position labels at the bottom
-               )))
+                     # geom_sf(aes(fill = as.factor(diff_0420)), colour = NA) +
+                     # geom_sf(aes(fill = as.factor(diff_2040)), colour = NA) +
+                     # geom_sf(aes(fill = as.factor(diff_4060)), colour = NA) +
+                     geom_sf(aes(fill = as.factor(diff_2080)), colour = NA) +
+                     geom_sf(data = perim_esp, fill = NA, alpha = 0.5,
+                             color = "grey") +
+                     geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
+                     scale_fill_manual(na.value = "#F6F6F6",values = pal1,
+                                       name = "Difference \n in months") +
+                     theme_minimal() +
+                     theme(legend.position = "bottom") +
+                     guides(fill = guide_legend(
+                       ncol = 13,  # Set the number of columns
+                       title.position = "left",  # Position title at the top
+                       label.position = "bottom"  # Position labels at the bottom
+                     )))
 
 ggarrange(leg1)
 
@@ -472,48 +443,14 @@ pal <- rev(brewer.pal(11, name_pal))
 pal[11]
 pal[12] = "#74011C"
 pal[13] = "#4B0011"
-alb_04 <- ggplot(df_join) +
-  geom_sf(aes(fill = as.factor(Alb_2004)), colour = NA) +
-  geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
-  scale_fill_manual(na.value = "#F6F6F6",values = pal,
-                    name = "Nº suitable \n months",
-                    limits = as.factor(seq(0,12,1))) +
-  theme_minimal() +
-  theme(legend.position = "top") +
-  guides(fill = guide_legend(
-    ncol = 13,  # Set the number of columns
-    title.position = "left",  # Position title at the top
-    label.position = "bottom"  # Position labels at the bottom
-  ))
 
-alb_20 <- ggplot(df_join) +  geom_sf(aes(fill = as.factor(Alb_2020)), colour = NA) +
-  geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
-  scale_fill_manual(na.value = "#F6F6F6",values = pal,
-                    name = "Nº suitable \n months",
-                    limits = as.factor(seq(0,12,1))) +
-  theme_minimal() +
-  theme(legend.position = "top") +
-  guides(fill = guide_legend(
-    ncol = 13,  # Set the number of columns
-    title.position = "left",  # Position title at the top
-    label.position = "bottom"  # Position labels at the bottom
-  ))
-
-alb_60 <- ggplot(df_join) +
- geom_sf(aes(fill = as.factor(Alb_2040)), colour = NA) +
-  geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
-  scale_fill_manual(na.value = "#F6F6F6",values = pal,
-                    name = "Nº suitable \n months",
-                    limits = as.factor(seq(0,12,1))) +
-  theme_minimal() +
-  theme(legend.position = "top") +
-  guides(fill = guide_legend(
-    ncol = 13,  # Set the number of columns
-    title.position = "left",  # Position title at the top
-    label.position = "bottom"  # Position labels at the bottom
-  ))
-
+# alb_04 <- ggplot(df_join) +
+# alb_20 <- ggplot(df_join) +
+# alb_60 <- ggplot(df_join) +
 alb_80 <- ggplot(df_join) +
+  # geom_sf(aes(fill = as.factor(Alb_2004)), colour = NA) +
+  # geom_sf(aes(fill = as.factor(Alb_2020)), colour = NA) +
+  # geom_sf(aes(fill = as.factor(Alb_2040)), colour = NA) +
   geom_sf(aes(fill = as.factor(Alb_2060)), colour = NA) +
   geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
   scale_fill_manual(na.value = "#F6F6F6",values = pal,
@@ -528,22 +465,29 @@ alb_80 <- ggplot(df_join) +
   ))
 
 leg <- get_legend(ggplot(df_join) +
-  geom_sf(aes(fill = as.factor(Alb_2004)), colour = NA) +
-  geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
-  scale_fill_manual(na.value = "#F6F6F6",values = pal,
-                    name = "Nº suitable \n months",
-                    limits = as.factor(seq(0,12,1))) +
-  theme_minimal() )
+                    geom_sf(aes(fill = as.factor(Alb_2004)), colour = NA) +
+                    # geom_sf(aes(fill = as.factor(Alb_2020)), colour = NA) +
+                    # geom_sf(aes(fill = as.factor(Alb_2040)), colour = NA) +
+                    # geom_sf(aes(fill = as.factor(Alb_2060)), colour = NA) +
+                    geom_sf(data = can_box, lwd = 0.2) + coord_sf(datum = NA) +
+                    scale_fill_manual(na.value = "#F6F6F6",values = pal,
+                                      name = "Nº suitable \n months",
+                                      limits = as.factor(seq(0,12,1))) +
+                    theme_minimal() )
 
 gg1 <- ggarrange(alb_04 + ggtitle("a)                      2004"),
                  alb_20 + ggtitle("b)                      2020"),
                  alb_60 + ggtitle("c)                 2041-2060"),
                  alb_80 + ggtitle("d)                 2061-2080"),
-          nrow = 1, widths = c(1,1,1,1), common.legend = TRUE)
+                 nrow = 1, widths = c(1,1,1,1), common.legend = TRUE)
 gg2 <- ggarrange(diff_1 + ggtitle("e)"),
                  diff_2 + ggtitle("f)"),
                  diff_3 + ggtitle("g)"),
                  nrow = 1, widths = c(1,1,1))
-ggarrange(gg1,gg2, leg1,nrow = 3, heights = c(0.9,1,0.3))
+ggarr_comp <- ggarrange(gg1,gg2, leg1,nrow = 3, heights = c(0.9,1,0.3))
 
+ggsave("~/Documentos/PHD/2024/R_M/Plots/procB/panel_camb_clim_ESP.png", 
+       ggarr_comp, 
+       height = 10, width = 11,
+       bg = "white", dpi = 300)
 
