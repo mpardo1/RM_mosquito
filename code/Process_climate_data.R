@@ -35,21 +35,8 @@ temp_eu <- rast("data/monthly_mean_temp_2020_europe.grib") # Skin temperature
 temp_eu <- tapp(temp_eu, "month", mean) # Compute monthly mean
 plot(temp_eu[[7]])
 
-
-# map europe province level ----------------------------------
-# SHP_1 <- get_eurostat_geospatial(
-#   resolution = 10,
-#   nuts_level = 3,
-#   year = 2016)
-# 
-# ggplot(SHP_1) +
-#   geom_sf(aes(fill = NUTS_NAME), color = NA) +
-#   theme(legend.position = "none") +
-#   scale_fill_viridis_d()
-time = "2041-2060"
-var = "tmin"
-Path <- paste0("~/INVASIBILITY_THRESHOLD/data/future-climate/",
-               var,"_mean",time,".tif")
+# Load map CMIP6 to have the same coord sys for present and future maps
+Path <- paste0("output/245_tmin2041-2060.tif") # File from CMIP6
 tmin_w = rast(Path)
 exact_extent <- c(xmin = -25, xmax = 40, ymin = 25, ymax = 75)
 tmin_w <- crop(tmin_w, exact_extent)
@@ -100,19 +87,12 @@ clim_pop[, R0_alb := mapply(R0_func_alb, tmean, prec, pop)]
 clim_pop[, R0_aeg := mapply(R0_func_aeg, tmean, prec, pop)]
 # clim_pop[, R0_jap := mapply(R0_func_jap, tmean, prec, pop)]
 saveRDS(clim_pop,
-        paste0("~/INVASIBILITY_THRESHOLD/data/ERA5/Europe/eu_clim_same_coords_",2020,".Rds"))
+        paste0("output/eu_clim_same_coords_",2020,".Rds"))
 # clim_pop <- readRDS(paste0("~/INVASIBILITY_THRESHOLD/data/ERA5/Europe/eu_clim_",2020,".Rds"))
 
 clim_pop$bool_alb <- ifelse(clim_pop$R0_alb>1,1,0)
 clim_pop$bool_aeg <- ifelse(clim_pop$R0_aeg>1,1,0)
 clim_pop$bool_jap <- ifelse(clim_pop$R0_jap>1,1,0)
-
-# test for decundity alb
-ggplot(clim_pop) +
-  geom_point(aes(tmean, R0_alb))
-
-ggplot(clim_pop) +
-  geom_point(aes(tmean, R0_aeg))
 
 # Group by location
 clim_pop <- clim_pop[,.(sum_alb = sum(bool_alb),
@@ -121,7 +101,7 @@ clim_pop <- clim_pop[,.(sum_alb = sum(bool_alb),
 
 # add the lon lat -------------------------------------
 grid_points$id <- c(1:nrow(grid_points))
-saveRDS(grid_points, "~/INVASIBILITY_THRESHOLD/data/ERA5/Europe/grid_points.Rds")
+saveRDS(grid_points, "~/output/grid_points.Rds")
 
 clim_pop <- clim_pop %>% left_join(grid_points)
 
@@ -132,76 +112,6 @@ ggplot(clim_pop,
 
 # save the df
 saveRDS(clim_pop,
-        paste0("~/INVASIBILITY_THRESHOLD/data/ERA5/Europe/eu_R0_fitfuture_clim_",2020,".Rds"))
+        paste0("output/eu_R0_fitfuture_clim_",2020,".Rds"))
 
-clim_pop <- readRDS("~/INVASIBILITY_THRESHOLD/data/ERA5/Europe/eu_R0_fitfuture_clim_2020.Rds")
-
-# Plot the Eu map
-library(RColorBrewer)
-name_pal = "RdYlBu"
-display.brewer.pal(11, name_pal)
-pal <- rev(brewer.pal(11, name_pal))
-pal[11]
-pal[12] = "#74011C"
-pal[13] = "#4B0011"
-letsize = 16
-alb <- ggplot(clim_pop) +
-  geom_raster(aes(x = lon, y = lat, 
-                  fill = as.factor(sum_alb)),alpha = 1) +
-  scale_fill_manual(values = pal,
-                    name = "Nº suitable \n months",
-                    limits = factor(seq(0,12,1)),
-                    na.value = "#FCFCFC") +
-  ylim(c(25,75)) + xlim(c(-30,40)) +
-  xlab("") + ylab("") +
-  theme_minimal() +
-  theme(panel.grid = element_blank(),
-        panel.border = element_blank(),
-        plot.margin = unit(c(0, 0, 0, 0), "null"),
-        panel.margin = unit(c(0, 0, 0, 0), "null"),
-        axis.ticks = element_blank(),
-        axis.text = element_blank(),
-        axis.title = element_blank(),
-        axis.line = element_blank(),
-        axis.ticks.length = unit(0, "null"),
-        axis.ticks.margin = unit(0, "null"), 
-        # legend.position = "none",
-        legend.box = "horizontal")
-
-aeg <- ggplot(clim_pop) +
-  geom_raster(aes(x = lon, y = lat, 
-                  fill = as.factor(sum_aeg)),alpha = 1) +
-  scale_fill_manual(values = pal,
-                    name = "Nº suitable \n months",
-                    limits = factor(seq(0,12,1)),
-                    na.value = "#FCFCFC") +
-  ylim(c(25,75)) + xlim(c(-30,40)) +
-  xlab("") + ylab("") +
-  theme_minimal() +
-  theme(panel.grid = element_blank(),
-        panel.border = element_blank(),
-        plot.margin = unit(c(0, 0, 0, 0), "null"),
-        panel.margin = unit(c(0, 0, 0, 0), "null"),
-        axis.ticks = element_blank(),
-        axis.text = element_blank(),
-        axis.title = element_blank(),
-        axis.line = element_blank(),
-        axis.ticks.length = unit(0, "null"),
-        axis.ticks.margin = unit(0, "null"), 
-        legend.position = "none")
-aeg_leg <- get_legend(ggplot(clim_pop) +
-                        geom_raster(aes(x = lon, y = lat, 
-                                        fill = as.factor(sum_aeg)),alpha = 1) +
-                        scale_fill_manual(values = pal,
-                                          name = "Nº suitable \n months",
-                                          limits = factor(seq(0,12,1)),
-                                          na.value = "white") +
-                        theme(legend.position = "right"))
-
-library(ggpubr)
-ggarrange(alb + ggtitle(expression(paste("A ", italic("Ae. albopictus")))),
-          aeg + ggtitle(expression(paste("B ", italic("Ae. aegypti")))),
-          aeg_leg,
-          ncol = 3,
-          widths = c(1,1,0.4))
-
+clim_pop <- readRDS("output/eu_R0_fitfuture_clim_2020.Rds")
