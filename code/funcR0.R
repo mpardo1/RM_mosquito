@@ -80,7 +80,7 @@ R0_func_alb <- function(Te, rain, hum){
     h <- h_f(hum,rain)
     deltaE = deltaE_f_alb(Te)#0.1
     
-    R0 <- ((f*a*deltaa)*probla*((h*dE)/(h*dE+deltaE)))^(1/3)
+    R0 <- ((f*a*deltaa)*probla*((h*dE)/(h*dE+deltaE))) 
   }
   return(R0)
 }
@@ -106,7 +106,7 @@ R0_func_aeg <- function(Te, rain,hum){
     probla <- pLA_f_aeg(Te)
     h <- h_f(hum,rain)
     deltaE = deltaE_f_aeg(Te)
-    R0 <- ((f*a*deltaa)*probla*((h*dE)/(h*dE+deltaE)))^(1/3)
+    R0 <- ((f*a*deltaa)*probla*((h*dE)/(h*dE+deltaE))) 
   }
   return(R0)
 }
