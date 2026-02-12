@@ -2,7 +2,7 @@
 rm(list=ls())
 library(mapSpain)
 library(ggplot2)
-library("ggpubr")
+# library("ggpubr")
 library(data.table)
 source("code/funcR0.R")
 
@@ -58,16 +58,17 @@ df_rain <- data.frame(vec, albopictus, aegypti)
 df_rain <- reshape2::melt(df_rain, id.vars = "vec")
 plot_rain <- ggplot(df_rain) + 
   geom_line(aes(vec,value, color = variable), size = 1) +
-  # geom_hline(yintercept = 1, linetype = "dashed", color = "red") + 
-  scale_color_manual(name = "", values =pal,
+  scale_color_manual(name = "", values =c(pal[2],pal[1]),
                      labels = c(expression(italic("Ae. aegypti")),
                                 expression(italic("Ae. albopictus")))) +
-  # ,
-  # expression(italic("Ae. japonicus")))) +
   xlab("Rainfall (mm)") + ylab(TeX("$R_M$")) + 
   theme_bw() + theme(text = element_text(size = letsize),
                      legend.position = "none")
 plot_rain
+
+# Save
+ggsave("/Users/celsaaraujobarja/Documents/PHD/2026/Correction/rain_17.png",
+       width = 5, height = 5, dpi = 400)
 
 # rm as a function of human density ------------------------------------------
 vec <- seq(0,1000,0.1)
@@ -77,16 +78,17 @@ df_hum <- data.frame(vec,albopictus, aegypti)
 df_hum <- reshape2::melt(df_hum, id.vars = "vec")
 plot_hum <- ggplot(df_hum) + 
   geom_line(aes(vec,value, color = variable), size = 1) +
-  # geom_hline(yintercept = 1, linetype = "dashed", color = "red") + 
-  scale_color_manual(name = "", values =pal,
+  scale_color_manual(name = "", values =c(pal[2],pal[1]),
                      labels = c(expression(italic("Ae. aegypti")),
                                 expression(italic("Ae. albopictus")))) +
-  # ,
-  # expression(italic("Ae. japonicus")))) +
   xlab("Human density") + ylab(TeX("$R_M$")) + 
   theme_bw() + theme(text = element_text(size = letsize),
                      legend.position = "none")
 plot_hum
+
+# Save
+ggsave("/Users/celsaaraujobarja/Documents/PHD/2026/Correction/hum_17.png",
+       width = 5, height = 5, dpi = 400)
 
 # join all the plots ------------------------------------------------------
 ggarrange(plot_temp + ggtitle("a)"),
@@ -112,13 +114,16 @@ ggsave("U:/temp_cut.png",
 
 # rain
 rain_cut <- plot_rain +
-  scale_y_break(c(1.5,5), scales = 0.5
-  ) +
+  scale_y_break(c(1,5), scales = 0.5 ) +
   theme(
     axis.text.x.top = element_blank(),
     axis.ticks.x.top = element_blank(),
     axis.title.x.top = element_blank()
   ) 
+
+# Save
+ggsave("/Users/celsaaraujobarja/Documents/PHD/2026/Correction/rain_17.png",
+       width = 5, height = 5, dpi = 400)
 
 # hum
 hum_cut <- plot_hum +
@@ -130,6 +135,9 @@ hum_cut <- plot_hum +
     axis.title.x.top = element_blank()
   ) 
 
+# Save
+ggsave("/Users/celsaaraujobarja/Documents/PHD/2026/Correction/rain_17.png",
+       width = 5, height = 5, dpi = 400)
 # join all the plots ------------------------------------------------------
 library(ggpubr)
 ggarrange( plot_rain + rremove("ylab")+ ggtitle("b)"),
