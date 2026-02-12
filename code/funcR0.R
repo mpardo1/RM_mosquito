@@ -85,6 +85,23 @@ R0_func_alb <- function(Te, rain, hum){
   return(R0)
 }
 
+# R0 function by temperature:
+R0_func_alb_old <- function(Te, rain, hum){
+  if(is.na(Te) | is.na(rain) | is.na(hum)){
+    R0 <- NA
+  }else{
+    a <- a_f_alb(Te)
+    f <- (1/2)*TFD_f_alb(Te)
+    deltaa <- lf_f_alb(Te)
+    dE <- dE_f_alb(Te)
+    probla <- pLA_f_alb(Te)
+    h <- h_f(hum,rain)
+    deltaE = deltaE_f_alb(Te)#0.1
+    
+    R0 <- ((f*a*deltaa)*probla*((h*dE)/(h*dE+deltaE)))^(1/3)
+  }
+  return(R0)
+}
 ####------------------------------Aegypti------------------------####
 a_f_aeg <- function(temp){Briere_func(0.000202,13.35,40.08,temp)} # Biting rate
 EFD_f_aeg <- function(temp){Briere_func(0.00856,14.58,34.61,temp)} # Fecundity
@@ -111,4 +128,18 @@ R0_func_aeg <- function(Te, rain,hum){
   return(R0)
 }
 
-
+R0_func_aeg_old <- function(Te, rain,hum){
+  if(is.na(Te) | is.na(rain) | is.na(hum)){
+    R0 <- NA
+  }else{
+    a <- 1#a_f_aeg(Te)
+    f <- EFD_f_aeg(Te) #40
+    deltaa <- lf_f_aeg(Te)
+    dE <- dE_f_aeg(Te)
+    probla <- pLA_f_aeg(Te)
+    h <- h_f(hum,rain)
+    deltaE = deltaE_f_aeg(Te)
+    R0 <- ((f*a*deltaa)*probla*((h*dE)/(h*dE+deltaE)))^(1/3)
+  }
+  return(R0)
+}
