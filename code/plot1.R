@@ -34,8 +34,7 @@ letsize = 16
 library("latex2exp")
 plot_temp <- ggplot(df_out) + 
   geom_line(aes(vec,value, color=variable), size = 1) +
-  geom_hline(yintercept = 1, linetype = "dashed", color = "red") +
-  ylab(TeX("$R_M$")) + 
+s  ylab(TeX("$R_M$")) + 
   scale_color_manual(name = "", values =pal,
                      labels = c(expression(italic("Ae. aegypti")),
                                 expression(italic("Ae. albopictus")))) +
@@ -114,30 +113,33 @@ ggsave("U:/temp_cut.png",
 
 # rain
 rain_cut <- plot_rain +
-  scale_y_break(c(1,5), scales = 0.5 ) +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "red") +
+  scale_y_break(c(0.25,0.5), scales = 1 ) +
   theme(
     axis.text.x.top = element_blank(),
     axis.ticks.x.top = element_blank(),
     axis.title.x.top = element_blank()
-  ) 
+  ) + ggtitle("b)")
 
 # Save
-ggsave("/Users/celsaaraujobarja/Documents/PHD/2026/Correction/rain_17.png",
+ggsave("U:/rain_cut.png",
        width = 5, height = 5, dpi = 400)
 
 # hum
 hum_cut <- plot_hum +
-  scale_y_break(c(1.5,5), scales = 0.5
+  geom_hline(yintercept = 1, linetype = "dashed", color = "red") +
+  scale_y_break(c(0.25,0.5), scales =1
   ) +
   theme(
     axis.text.x.top = element_blank(),
     axis.ticks.x.top = element_blank(),
     axis.title.x.top = element_blank()
-  ) 
+  ) + ggtitle("c)")
 
 # Save
-ggsave("/Users/celsaaraujobarja/Documents/PHD/2026/Correction/rain_17.png",
+ggsave("U:/hum_cut.png",
        width = 5, height = 5, dpi = 400)
+
 # join all the plots ------------------------------------------------------
 library(ggpubr)
 ggarrange( plot_rain + rremove("ylab")+ ggtitle("b)"),
@@ -200,8 +202,8 @@ df_rain <- data.frame(vec, albopictus, aegypti)
 df_rain <- reshape2::melt(df_rain, id.vars = "vec")
 plot_rain <- ggplot(df_rain) + 
   geom_line(aes(vec,value, color = variable), size = 1) +
-  # geom_hline(yintercept = 1, linetype = "dashed", color = "red") + 
-  scale_color_manual(name = "", values =pal,
+  geom_hline(yintercept = 1, linetype = "dashed", color = "red") + 
+  scale_color_manual(name = "", values =c(pal[2],pal[1]),
                      labels = c(expression(italic("Ae. aegypti")),
                                 expression(italic("Ae. albopictus")))) +
   # ,
@@ -218,9 +220,9 @@ albopictus <- sapply(vec,R0_func_alb_old, rain = 0, Te = temp_opt)
 df_hum <- data.frame(vec,albopictus, aegypti)
 df_hum <- reshape2::melt(df_hum, id.vars = "vec")
 plot_hum <- ggplot(df_hum) + 
-  geom_line(aes(vec,log10(value), color = variable), size = 1) +
-  # geom_hline(yintercept = 1, linetype = "dashed", color = "red") + 
-  scale_color_manual(name = "", values =pal,
+  geom_line(aes(vec,value, color = variable), size = 1) +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "red") + 
+  scale_color_manual(name = "", values =c(pal[2],pal[1]),
                      labels = c(expression(italic("Ae. aegypti")),
                                 expression(italic("Ae. albopictus")))) +
   # ,
@@ -231,11 +233,16 @@ plot_hum <- ggplot(df_hum) +
 plot_hum
 
 # join all the plots ------------------------------------------------------
+library(ggpubr)
 ggarrange(plot_temp + ggtitle("a)"),
-          plot_rain + rremove("ylab")+ ggtitle("b)"),
-          plot_hum + rremove("ylab")+ ggtitle("c)"),
-          ncol = 3,
-          widths = c(1,0.7,0.7))
+          plot_rain + ggtitle("b)"),
+          plot_hum + ggtitle("c)"),
+          ncol = 3)
+
+# Save
+ggsave("U:/hum_old.png",
+       width = 5, height = 5, dpi = 400)
+
 
 # Reshape axis
 library(ggbreak)
@@ -257,3 +264,7 @@ ggarrange(plot_temp + ggtitle("a)"),
           plot_hum + rremove("ylab")+ ggtitle("c)"),
           ncol = 3,
           widths = c(1,0.7,0.7))
+
+# Save
+ggsave("U:/hum_cut.png",
+       width = 5, height = 5, dpi = 400)
